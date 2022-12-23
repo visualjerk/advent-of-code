@@ -1,26 +1,10 @@
 package main
 
 import (
+	"aoc.io/utils"
 	"fmt"
-	"os"
 	"strings"
 )
-
-func loadData() string {
-	file := "input"
-
-	if os.Getenv("TEST") != "" {
-		file = "test_input"
-	}
-
-	data, error := os.ReadFile(file)
-
-	if error != nil {
-		return ""
-	}
-
-	return string(data)
-}
 
 type Shape int
 
@@ -37,8 +21,8 @@ var OPPONENT_SHAPES = map[string]Shape{
 }
 
 var SHAPES_SCORE = map[Shape]int{
-	ROCK: 1,
-	PAPER: 2,
+	ROCK:     1,
+	PAPER:    2,
 	SCISSORS: 3,
 }
 
@@ -59,18 +43,18 @@ var ROUND_OUTCOMES = map[string]RoundOutcome{
 var OUTCOME_SCORE = map[RoundOutcome]int{
 	LOSS: 0,
 	DRAW: 3,
-	WIN: 6,
+	WIN:  6,
 }
 
 var SHAPE_TO_WIN = map[Shape]Shape{
-	ROCK: PAPER,
-	PAPER: SCISSORS,
+	ROCK:     PAPER,
+	PAPER:    SCISSORS,
 	SCISSORS: ROCK,
 }
 
 var SHAPE_TO_LOSE = map[Shape]Shape{
-	ROCK: SCISSORS,
-	PAPER: ROCK,
+	ROCK:     SCISSORS,
+	PAPER:    ROCK,
 	SCISSORS: PAPER,
 }
 
@@ -88,11 +72,11 @@ func getRounds(data string) [][2]string {
 }
 
 func getMyShape(opponentShape Shape, outcome RoundOutcome) Shape {
-	if (outcome == WIN) {
+	if outcome == WIN {
 		return SHAPE_TO_WIN[opponentShape]
 	}
 
-	if (outcome == LOSS) {
+	if outcome == LOSS {
 		return SHAPE_TO_LOSE[opponentShape]
 	}
 
@@ -121,7 +105,7 @@ func getTotalScore(rounds [][2]string) int {
 }
 
 func main() {
-	data := loadData()
+	data := utils.LoadData()
 	rounds := getRounds(data)
 	totalScore := getTotalScore(rounds)
 

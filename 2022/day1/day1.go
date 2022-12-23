@@ -1,28 +1,12 @@
 package main
 
 import (
+	"aoc.io/utils"
 	"fmt"
-	"os"
 	"sort"
 	"strconv"
 	"strings"
 )
-
-func loadData() string {
-	file := "input"
-
-	if os.Getenv("TEST") != "" {
-		file = "test_input"
-	}
-
-	data, error := os.ReadFile(file)
-
-	if error != nil {
-		return ""
-	}
-
-	return string(data)
-}
 
 func getBags(data string) []string {
 	return strings.Split(data, "\n\n")
@@ -76,7 +60,7 @@ func sumCalories(calories []int) int {
 }
 
 func main() {
-	data := loadData()
+	data := utils.LoadData()
 	bags := getBags(data)
 	bagCalories := getBagCalories(bags)
 	topCalories := getTopCalories(bagCalories, 3)
