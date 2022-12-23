@@ -36,12 +36,6 @@ var OPPONENT_SHAPES = map[string]Shape{
 	"C": SCISSORS,
 }
 
-var MY_SHAPES = map[string]Shape{
-	"X": ROCK,
-	"Y": PAPER,
-	"Z": SCISSORS,
-}
-
 var SHAPES_SCORE = map[Shape]int{
 	ROCK: 1,
 	PAPER: 2,
@@ -55,6 +49,12 @@ const (
 	DRAW
 	WIN
 )
+
+var ROUND_OUTCOMES = map[string]RoundOutcome{
+	"X": LOSS,
+	"Y": DRAW,
+	"Z": WIN,
+}
 
 var OUTCOME_SCORE = map[RoundOutcome]int{
 	LOSS: 0,
@@ -76,34 +76,39 @@ func getRounds(data string) [][2]string {
 	return rounds
 }
 
-func getOutcome(opponentShape Shape, myShape Shape) RoundOutcome {
-	if (opponentShape == myShape) {
-		return DRAW
+func getMyShape(opponentShape Shape, outcome RoundOutcome) Shape {
+	if (outcome == DRAW) {
+		return opponentShape
 	}
 
-	if (opponentShape == ROCK && myShape == PAPER) {
-		return WIN
+	if (opponentShape == ROCK) {
+		if (outcome == WIN) {
+			return PAPER
+		}
+		return SCISSORS
 	}
 
-	if (opponentShape == PAPER && myShape == SCISSORS) {
-		return WIN
+	if (opponentShape == PAPER) {
+		if (outcome == WIN) {
+			return SCISSORS
+		}
+		return ROCK
 	}
-
-	if (opponentShape == SCISSORS && myShape == ROCK) {
-		return WIN
+	
+	if (opponentShape == SCISSORS && outcome == WIN) {
+		return ROCK
 	}
-
-	return LOSS
+	
+	return PAPER
 }
 
 func getRoundScore(round [2]string) int {
 	opponentShape := OPPONENT_SHAPES[round[0]]
-	myShape := MY_SHAPES[round[1]]
-
-	shapeScore := SHAPES_SCORE[myShape]
-
-	outcome := getOutcome(opponentShape, myShape)
+	outcome := ROUND_OUTCOMES[round[1]]
 	outcomeScore := OUTCOME_SCORE[outcome]
+
+	myShape := getMyShape(opponentShape, outcome)
+	shapeScore := SHAPES_SCORE[myShape]
 
 	return shapeScore + outcomeScore
 }
