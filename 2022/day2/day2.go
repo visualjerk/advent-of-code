@@ -62,6 +62,17 @@ var OUTCOME_SCORE = map[RoundOutcome]int{
 	WIN: 6,
 }
 
+var SHAPE_TO_WIN = map[Shape]Shape{
+	ROCK: PAPER,
+	PAPER: SCISSORS,
+	SCISSORS: ROCK,
+}
+
+var SHAPE_TO_LOSE = map[Shape]Shape{
+	ROCK: SCISSORS,
+	PAPER: ROCK,
+	SCISSORS: PAPER,
+}
 
 func getRounds(data string) [][2]string {
 	lines := strings.Split(data, "\n")
@@ -77,29 +88,15 @@ func getRounds(data string) [][2]string {
 }
 
 func getMyShape(opponentShape Shape, outcome RoundOutcome) Shape {
-	if (outcome == DRAW) {
-		return opponentShape
+	if (outcome == WIN) {
+		return SHAPE_TO_WIN[opponentShape]
 	}
 
-	if (opponentShape == ROCK) {
-		if (outcome == WIN) {
-			return PAPER
-		}
-		return SCISSORS
+	if (outcome == LOSS) {
+		return SHAPE_TO_LOSE[opponentShape]
 	}
 
-	if (opponentShape == PAPER) {
-		if (outcome == WIN) {
-			return SCISSORS
-		}
-		return ROCK
-	}
-	
-	if (opponentShape == SCISSORS && outcome == WIN) {
-		return ROCK
-	}
-	
-	return PAPER
+	return opponentShape
 }
 
 func getRoundScore(round [2]string) int {
