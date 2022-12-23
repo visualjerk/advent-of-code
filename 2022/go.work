@@ -3,5 +3,6 @@ go 1.19
 use (
 	./day1
 	./day2
+	./day3
 	./utils
 )
