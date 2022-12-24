@@ -3,48 +3,56 @@ package main
 import (
 	"aoc.io/utils"
 	"fmt"
+	sf "github.com/sa-/slicefunk"
 	"strings"
 )
 
-func getRucksacks(data string) [][2][]string {
+func getRucksacks(data string) [][]string {
 	lines := strings.Split(data, "\n")
-	rucksacks := [][2][]string{}
+	rucksacks := [][]string{}
 
 	for i := 0; i < len(lines); i++ {
 		items := strings.Split(lines[i], "")
-		half := len(items) / 2
-		compartments := [2][]string{items[:half], items[half:]}
-		rucksacks = append(rucksacks, compartments)
+		rucksacks = append(rucksacks, items)
 	}
 
 	return rucksacks
 }
 
-func getWrongItem(rucksack [2][]string) string {
-	firstCompartment := rucksack[0]
-	secondCompartment := strings.Join(rucksack[1], "")
+func getSharedItem(itemGroups [][]string) string {
+	firstItemGroup := itemGroups[0]
+	remainingItemGroups := sf.Map(itemGroups[1:], func(group []string) string { return strings.Join(group, "") })
 
-	var wrongItem string
+	sharedItems := sf.Filter(firstItemGroup, func(item string) bool {
+		foundInGroups := sf.Filter(remainingItemGroups, func(group string) bool {
+			return strings.Contains(group, item)
+		})
+		return len(foundInGroups) == len(remainingItemGroups)
+	})
 
-	for i := 0; i < len(firstCompartment); i++ {
-		item := firstCompartment[i]
-		if strings.Contains(secondCompartment, item) {
-			wrongItem = item
+	return sharedItems[0]
+}
+
+func getSharedItems(rucksacks [][][]string) []string {
+	return sf.Map(rucksacks, getSharedItem)
+}
+
+func getRucksackGroups(rucksacks [][]string, groupCount int) [][][]string {
+	groups := [][][]string{}
+	groupIndex := 0
+
+	for i := 0; i < len(rucksacks); i++ {
+		if len(groups) < groupIndex+1 {
+			groups = append(groups, [][]string{})
+		}
+		groups[groupIndex] = append(groups[groupIndex], rucksacks[i])
+
+		if (i+1)%groupCount == 0 {
+			groupIndex++
 		}
 	}
 
-	return wrongItem
-}
-
-func getWrongItems(rucksacks [][2][]string) []string {
-	wrongItems := []string{}
-
-	for i := 0; i < len(rucksacks); i++ {
-		wrongItem := getWrongItem(rucksacks[i])
-		wrongItems = append(wrongItems, wrongItem)
-	}
-
-	return wrongItems
+	return groups
 }
 
 func getItemPriority(item string) int {
@@ -71,8 +79,9 @@ func getTotalPriority(items []string) int {
 func main() {
 	data := utils.LoadData()
 	rucksacks := getRucksacks(data)
-	wrongItems := getWrongItems(rucksacks)
-	totalPriority := getTotalPriority(wrongItems)
+	rucksackGroups := getRucksackGroups(rucksacks, 3)
+	sharedItems := getSharedItems(rucksackGroups)
+	totalPriority := getTotalPriority(sharedItems)
 
 	fmt.Println(totalPriority)
 }
