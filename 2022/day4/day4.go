@@ -1,12 +1,11 @@
 package main
 
 import (
+	"aoc.io/utils"
 	"fmt"
+	sf "github.com/sa-/slicefunk"
 	"strconv"
 	"strings"
-
-	"aoc.io/utils"
-	sf "github.com/sa-/slicefunk"
 )
 
 func safeStringToInt(input string) int {
@@ -33,25 +32,25 @@ func getPairSections(input string) [][2][2]int {
 	return sf.Map(rawPairSections, parseRawPairSection)
 }
 
-func sectionIsFullyIn(section1 [2]int, section2 [2]int) bool {
-	return section2[0] <= section1[0] && section1[1] <= section2[1]
+func sectionsAreOverlapping(section1 [2]int, section2 [2]int) bool {
+	return !(section1[1] < section2[0] || section2[1] < section1[0])
 }
 
-func hasFullyOverlappingPair(pairSection [2][2]int) bool {
+func hasOverlappingPair(pairSection [2][2]int) bool {
 	section1 := pairSection[0]
 	section2 := pairSection[1]
 
-	return sectionIsFullyIn(section1, section2) || sectionIsFullyIn(section2, section1)
+	return sectionsAreOverlapping(section1, section2)
 }
 
-func getFullyOverlappingPairs(pairSections [][2][2]int) [][2][2]int {
-	return sf.Filter(pairSections, hasFullyOverlappingPair)
+func getOverlappingPairs(pairSections [][2][2]int) [][2][2]int {
+	return sf.Filter(pairSections, hasOverlappingPair)
 }
 
 func main() {
 	data := utils.LoadData()
 	pairSections := getPairSections(data)
-	fullyOverlappingPairs := getFullyOverlappingPairs(pairSections)
+	fullyOverlappingPairs := getOverlappingPairs(pairSections)
 
 	fmt.Println(len(fullyOverlappingPairs))
 }
