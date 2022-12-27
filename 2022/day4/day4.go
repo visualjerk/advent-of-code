@@ -4,20 +4,11 @@ import (
 	"aoc.io/utils"
 	"fmt"
 	sf "github.com/sa-/slicefunk"
-	"strconv"
 	"strings"
 )
 
-func safeStringToInt(input string) int {
-	marks, err := strconv.Atoi(input)
-	if err != nil {
-		return 0
-	}
-	return marks
-}
-
 func parseRawSection(rawSection string) [2]int {
-	section := sf.Map(strings.Split(rawSection, "-"), safeStringToInt)
+	section := sf.Map(strings.Split(rawSection, "-"), utils.SafeStringToInt)
 	return [2]int{section[0], section[1]}
 }
 

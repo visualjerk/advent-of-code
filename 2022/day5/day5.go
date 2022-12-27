@@ -1,25 +1,33 @@
 package main
 
 import (
-	"fmt"
-	"strings"
-
 	"aoc.io/utils"
+	"fmt"
+	sf "github.com/sa-/slicefunk"
+	"strings"
 )
 
-func parseRawStacks(rawStacks string) [][]string {
+type Stack []string
+
+type Rearrangement struct {
+	crateAmount int
+	fromStack   int
+	toStack     int
+}
+
+func parseRawStacks(rawStacks string) []Stack {
 	lines := strings.Split(rawStacks, "\n")
 
 	indexLine := lines[len(lines)-1]
 	indexes := strings.Split(strings.TrimSpace(indexLine), "   ")
 
-	stacks := [][]string{}
+	stacks := []Stack{}
 	for i := 0; i < len(indexes); i++ {
-		stacks = append(stacks, []string{})
+		stacks = append(stacks, Stack{})
 	}
 
 	crateLines := lines[:len(lines)-1]
-	for i := 0; i < len(crateLines); i++ {
+	for i := len(crateLines) - 1; i >= 0; i-- {
 		crates := strings.Split(strings.ReplaceAll(crateLines[i], "    ", " "), " ")
 
 		for u := 0; u < len(stacks); u++ {
@@ -32,10 +40,62 @@ func parseRawStacks(rawStacks string) [][]string {
 	return stacks
 }
 
+func parseRawRearrangements(rawRearrangements string) []Rearrangement {
+	rearrangements := []Rearrangement{}
+
+	lines := strings.Split(rawRearrangements, "\n")
+	for i := 0; i < len(lines); i++ {
+		lineParts := strings.Split(lines[i], " ")
+		rearrangement := Rearrangement{
+			crateAmount: utils.SafeStringToInt(lineParts[1]),
+			fromStack:   utils.SafeStringToInt(lineParts[3]) - 1,
+			toStack:     utils.SafeStringToInt(lineParts[5]) - 1,
+		}
+		rearrangements = append(rearrangements, rearrangement)
+	}
+
+	return rearrangements
+}
+
+func applyRearrangement(stacks []Stack, r Rearrangement) []Stack {
+	for i := 0; i < r.crateAmount; i++ {
+		lastIndex := len(stacks[r.fromStack]) - 1
+		stacks[r.toStack] = append(stacks[r.toStack], stacks[r.fromStack][lastIndex])
+		stacks[r.fromStack] = stacks[r.fromStack][:lastIndex]
+	}
+	return stacks
+}
+
+func applyRearrangements(stacks []Stack, rearrangements []Rearrangement) []Stack {
+	resultStacks := stacks
+	for i := 0; i < len(rearrangements); i++ {
+		rearrangement := rearrangements[i]
+		resultStacks = applyRearrangement(resultStacks, rearrangement)
+	}
+	return resultStacks
+}
+
+func getCrateType(crate string) string {
+	return strings.Trim(strings.Trim(crate, "["), "]")
+}
+
+func getTopCrateTypes(stacks []Stack) []string {
+	topCrates := []string{}
+	for i := 0; i < len(stacks); i++ {
+		topCrates = append(topCrates, stacks[i][len(stacks[i])-1])
+	}
+	return sf.Map(topCrates, getCrateType)
+}
+
 func main() {
 	data := utils.LoadData()
 	dataParts := strings.Split(data, "\n\n")
-	stacks := parseRawStacks(dataParts[0])
 
-	fmt.Println(stacks)
+	stacks := parseRawStacks(dataParts[0])
+	rearrangements := parseRawRearrangements(dataParts[1])
+
+	finalStacks := applyRearrangements(stacks, rearrangements)
+	topCrateTypes := getTopCrateTypes(finalStacks)
+
+	fmt.Println(strings.Join(topCrateTypes, ""))
 }
