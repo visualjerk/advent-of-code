@@ -3,7 +3,6 @@ package main
 import (
 	"aoc.io/utils"
 	"fmt"
-	sf "github.com/sa-/slicefunk"
 	"strings"
 )
 
@@ -13,6 +12,10 @@ type Rearrangement struct {
 	crateAmount int
 	fromStack   int
 	toStack     int
+}
+
+func parseRawCrate(crate string) string {
+	return strings.Trim(strings.Trim(crate, "["), "]")
 }
 
 func parseRawStacks(rawStacks string) []Stack {
@@ -32,7 +35,7 @@ func parseRawStacks(rawStacks string) []Stack {
 
 		for u := 0; u < len(stacks); u++ {
 			if crates[u] != "" {
-				stacks[u] = append(stacks[u], crates[u])
+				stacks[u] = append(stacks[u], parseRawCrate(crates[u]))
 			}
 		}
 	}
@@ -75,16 +78,12 @@ func applyRearrangements(stacks []Stack, rearrangements []Rearrangement) []Stack
 	return resultStacks
 }
 
-func getCrateType(crate string) string {
-	return strings.Trim(strings.Trim(crate, "["), "]")
-}
-
 func getTopCrateTypes(stacks []Stack) []string {
 	topCrates := []string{}
 	for i := 0; i < len(stacks); i++ {
 		topCrates = append(topCrates, stacks[i][len(stacks[i])-1])
 	}
-	return sf.Map(topCrates, getCrateType)
+	return topCrates
 }
 
 func main() {
