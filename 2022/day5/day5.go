@@ -77,7 +77,7 @@ func applyRearrangements(stacks []Stack, rearrangements []Rearrangement) []Stack
 	return resultStacks
 }
 
-func getTopCrateTypes(stacks []Stack) []string {
+func getTopCrates(stacks []Stack) []string {
 	topCrates := []string{}
 	for i := 0; i < len(stacks); i++ {
 		topCrates = append(topCrates, stacks[i][len(stacks[i])-1])
@@ -93,7 +93,7 @@ func main() {
 	rearrangements := parseRawRearrangements(dataParts[1])
 
 	finalStacks := applyRearrangements(stacks, rearrangements)
-	topCrateTypes := getTopCrateTypes(finalStacks)
+	topCrates := getTopCrates(finalStacks)
 
-	fmt.Println(strings.Join(topCrateTypes, ""))
+	fmt.Println(strings.Join(topCrates, ""))
 }
