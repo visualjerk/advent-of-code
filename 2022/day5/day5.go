@@ -1,11 +1,10 @@
 package main
 
 import (
+	"aoc.io/utils"
 	"fmt"
 	"math"
 	"strings"
-
-	"aoc.io/utils"
 )
 
 type Stack []string
