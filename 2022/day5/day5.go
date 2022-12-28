@@ -1,9 +1,11 @@
 package main
 
 import (
-	"aoc.io/utils"
 	"fmt"
+	"math"
 	"strings"
+
+	"aoc.io/utils"
 )
 
 type Stack []string
@@ -61,11 +63,9 @@ func parseRawRearrangements(rawRearrangements string) []Rearrangement {
 }
 
 func applyRearrangement(stacks []Stack, r Rearrangement) []Stack {
-	for i := 0; i < r.crateAmount; i++ {
-		lastIndex := len(stacks[r.fromStack]) - 1
-		stacks[r.toStack] = append(stacks[r.toStack], stacks[r.fromStack][lastIndex])
-		stacks[r.fromStack] = stacks[r.fromStack][:lastIndex]
-	}
+	index := int(math.Max(float64(len(stacks[r.fromStack])-r.crateAmount), 0))
+	stacks[r.toStack] = append(stacks[r.toStack], stacks[r.fromStack][index:]...)
+	stacks[r.fromStack] = stacks[r.fromStack][:index]
 	return stacks
 }
 
