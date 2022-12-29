@@ -6,26 +6,39 @@ import (
 	"strings"
 )
 
-func findSignalIndex(data string) int {
+func findIndexOfNthDistinctChars(data string, count int) int {
 	characters := strings.Split(data, "")
-	seenChars := map[string]bool{}
+	seenChars := map[string]int{}
 
-	for i := 0; i < len(characters); i++ {
+	for i := 0; i < len(characters); {
 		char := characters[i]
-		if seenChars[char] {
-			seenChars = map[string]bool{}
+		charSeenIndex := seenChars[char]
+		if charSeenIndex > 0 {
+			seenChars = map[string]int{}
+			i = charSeenIndex
+		} else {
+			seenChars[char] = i
+			if len(seenChars) == count {
+				return i + 1
+			}
 		}
-		seenChars[char] = true
-		if len(seenChars) == 4 {
-			return i + 1
-		}
+
+		i++
 	}
 	return -1
 }
 
+func findSignalIndex(data string) int {
+	return findIndexOfNthDistinctChars(data, 4)
+}
+
+func findMessageIndex(data string) int {
+	return findIndexOfNthDistinctChars(data, 14)
+}
+
 func main() {
 	data := utils.LoadData()
-	signalIndex := findSignalIndex(data)
+	messageIndex := findMessageIndex(data)
 
-	fmt.Println(signalIndex)
+	fmt.Println(messageIndex)
 }
