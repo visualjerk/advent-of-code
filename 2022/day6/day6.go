@@ -12,17 +12,16 @@ func findIndexOfNthDistinctChars(data string, count int) int {
 
 	for i := 0; i < len(characters); {
 		char := characters[i]
-		charSeenIndex := seenChars[char]
-		if charSeenIndex > 0 {
+		charSeenIndex, charSeen := seenChars[char]
+		if charSeen {
 			seenChars = map[string]int{}
 			i = charSeenIndex
 		} else {
 			seenChars[char] = i
-			if len(seenChars) == count {
-				return i + 1
-			}
 		}
-
+		if len(seenChars) == count {
+			return i + 1
+		}
 		i++
 	}
 	return -1
