@@ -24,6 +24,35 @@ type FileTree struct {
 	directories []Directory
 }
 
+func (tree *FileTree) getContainedFiles(directory Directory) []File {
+	files := []File{}
+
+	for _, file := range tree.files {
+		if *file.parent == directory {
+			files = append(files, file)
+		}
+	}
+
+	for _, otherDir := range tree.directories {
+		if otherDir.parent != nil && *otherDir.parent == directory {
+			files = append(files, tree.getContainedFiles(otherDir)...)
+		}
+	}
+
+	return files
+}
+
+func (tree *FileTree) calcSize(directory Directory) int {
+	files := tree.getContainedFiles(directory)
+	size := 0
+
+	for _, file := range files {
+		size += file.size
+	}
+
+	return size
+}
+
 type ParserContext struct {
 	currentDirectory *Directory
 	fileTree         FileTree
@@ -126,18 +155,20 @@ func parseCommandLineOutput(output string) FileTree {
 	return parserContext.fileTree
 }
 
+const TRESHOLD = 100000
+
 func main() {
 	data := utils.LoadData()
 	fileTree := parseCommandLineOutput(data)
 
+	sum := 0
+
 	for _, dir := range fileTree.directories {
-		fmt.Println("dir", dir.name)
-		if dir.parent != nil {
-			fmt.Println("parent", dir.parent.name)
+		size := fileTree.calcSize(dir)
+		if size <= TRESHOLD {
+			sum += size
 		}
 	}
 
-	for _, file := range fileTree.files {
-		fmt.Println("file", file.name, "parent", file.parent.name, "size", file.size, "ext", file.ext)
-	}
+	fmt.Println(sum)
 }
