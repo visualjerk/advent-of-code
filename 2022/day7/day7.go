@@ -19,9 +19,23 @@ type Directory struct {
 	parent *Directory
 }
 
+func (directory *Directory) isEqual(otherDir *Directory) bool {
+	// TODO: Also check parents here
+	return directory.name == otherDir.name
+}
+
 type FileTree struct {
 	files       []File
 	directories []Directory
+}
+
+func (tree *FileTree) getExistingDirectory(directory *Directory) *Directory {
+	for _, existingDir := range tree.directories {
+		if existingDir.isEqual(directory) {
+			return &existingDir
+		}
+	}
+	return nil
 }
 
 func (tree *FileTree) getContainedFiles(directory Directory) []File {
@@ -58,14 +72,19 @@ type ParserContext struct {
 	fileTree         FileTree
 }
 
-func (context *ParserContext) addDirectory(name string) {
+func (context *ParserContext) addDirectory(name string) *Directory {
 	directory := Directory{
 		name:   name,
 		parent: context.currentDirectory,
 	}
 
-	context.currentDirectory = &directory
+	existingDir := context.fileTree.getExistingDirectory(&directory)
+	if existingDir != nil {
+		return existingDir
+	}
+
 	context.fileTree.directories = append(context.fileTree.directories, directory)
+	return &directory
 }
 
 func (context *ParserContext) addFile(name string, ext string, size int) {
@@ -102,11 +121,15 @@ var cmdOpenDir = LineParser{
 		name := params["name"]
 
 		if name == ".." {
+			if context.currentDirectory == nil {
+				return
+			}
 			context.currentDirectory = context.currentDirectory.parent
 			return
 		}
 
-		context.addDirectory(name)
+		directory := context.addDirectory(name)
+		context.currentDirectory = directory
 	},
 }
 var cmdList = LineParser{
