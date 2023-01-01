@@ -2,6 +2,7 @@ package utils
 
 import (
 	"os"
+	"regexp"
 	"strconv"
 )
 
@@ -27,4 +28,14 @@ func SafeStringToInt(input string) int {
 		return 0
 	}
 	return marks
+}
+
+func GetRegexGroups(regEx regexp.Regexp, matches []string) (groups map[string]string) {
+	groups = map[string]string{}
+	for i, name := range regEx.SubexpNames() {
+		if i > 0 && i <= len(matches) {
+			groups[name] = matches[i]
+		}
+	}
+	return groups
 }
