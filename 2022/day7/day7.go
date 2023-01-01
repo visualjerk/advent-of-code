@@ -20,8 +20,13 @@ type Directory struct {
 }
 
 func (directory *Directory) isEqual(otherDir *Directory) bool {
-	// TODO: Also check parents here
-	return directory.name == otherDir.name
+	if directory.name != otherDir.name {
+		return false
+	}
+	if directory.parent != otherDir.parent {
+		return false
+	}
+	return true
 }
 
 type FileTree struct {
