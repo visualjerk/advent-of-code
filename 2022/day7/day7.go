@@ -57,6 +57,16 @@ type LineParser struct {
 	apply   LineParserApplier
 }
 
+func (parser *LineParser) parse(context *ParserContext, rawLine string) {
+	regEx := regexp.MustCompile(parser.pattern)
+	matches := regEx.FindStringSubmatch(rawLine)
+
+	if len(matches) > 0 {
+		result := utils.GetRegexGroups(*regEx, matches)
+		parser.apply(context, result)
+	}
+}
+
 var cmdOpenDir = LineParser{
 	`^\$ cd (?P<name>\S+)`,
 	func(context *ParserContext, params map[string]string) {
@@ -98,13 +108,7 @@ var parsers = []LineParser{
 
 func parseLine(context *ParserContext, rawLine string) {
 	for _, parser := range parsers {
-		regEx := regexp.MustCompile(parser.pattern)
-		matches := regEx.FindStringSubmatch(rawLine)
-
-		if len(matches) > 0 {
-			result := utils.GetRegexGroups(*regEx, matches)
-			parser.apply(context, result)
-		}
+		parser.parse(context, rawLine)
 	}
 }
 
