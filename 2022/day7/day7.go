@@ -1,10 +1,11 @@
 package main
 
 import (
-	"aoc.io/utils"
-	"fmt"
 	"regexp"
+	"sort"
 	"strings"
+
+	"aoc.io/utils"
 )
 
 type File struct {
@@ -73,10 +74,52 @@ func (tree *FileTree) calcSize(directory Directory) int {
 	return size
 }
 
-func (tree *FileTree) calcDirectorySizes() {
+func (tree *FileTree) calcUsedSpace() int {
+	return tree.directories[0].size
+}
+
+func (tree *FileTree) precalcDirectorySizes() {
 	for index, dir := range tree.directories {
 		tree.directories[index].size = tree.calcSize(dir)
 	}
+}
+
+func (tree *FileTree) getDirectoryWithMinSize(minSize int) Directory {
+	sortedDirs := make([]Directory, len(tree.directories))
+	copy(sortedDirs, tree.directories)
+
+	sort.Slice(sortedDirs, func(i, j int) bool {
+		return sortedDirs[i].size < sortedDirs[j].size
+	})
+
+	for index, dir := range sortedDirs {
+		if minSize <= dir.size {
+			return sortedDirs[index]
+		}
+	}
+	return Directory{}
+}
+
+func (tree *FileTree) deleteDirectory(directory Directory) {
+	println("deleted dir", directory.name, "with size", directory.size)
+}
+
+type Disk struct {
+	fileTree       FileTree
+	totalDiskSpace int
+}
+
+func (disk *Disk) freeUpSpace(amount int) {
+	usedSpace := disk.fileTree.calcUsedSpace()
+	freeSpace := disk.totalDiskSpace - usedSpace
+	neededSpace := amount - freeSpace
+
+	if neededSpace < 0 {
+		return
+	}
+
+	directory := disk.fileTree.getDirectoryWithMinSize(neededSpace)
+	disk.fileTree.deleteDirectory(directory)
 }
 
 type ParserContext struct {
@@ -190,20 +233,12 @@ func parseCommandLineOutput(output string) FileTree {
 	return parserContext.fileTree
 }
 
-const TRESHOLD = 100000
-
 func main() {
 	data := utils.LoadData()
+
 	fileTree := parseCommandLineOutput(data)
-	fileTree.calcDirectorySizes()
+	fileTree.precalcDirectorySizes()
 
-	sum := 0
-
-	for _, dir := range fileTree.directories {
-		if dir.size <= TRESHOLD {
-			sum += dir.size
-		}
-	}
-
-	fmt.Println(sum)
+	disk := Disk{fileTree: fileTree, totalDiskSpace: 70000000}
+	disk.freeUpSpace(30000000)
 }
