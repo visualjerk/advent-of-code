@@ -17,6 +17,7 @@ type File struct {
 type Directory struct {
 	name   string
 	parent *Directory
+	size   int
 }
 
 func (directory *Directory) isEqual(otherDir *Directory) bool {
@@ -70,6 +71,12 @@ func (tree *FileTree) calcSize(directory Directory) int {
 	}
 
 	return size
+}
+
+func (tree *FileTree) calcDirectorySizes() {
+	for index, dir := range tree.directories {
+		tree.directories[index].size = tree.calcSize(dir)
+	}
 }
 
 type ParserContext struct {
@@ -188,13 +195,13 @@ const TRESHOLD = 100000
 func main() {
 	data := utils.LoadData()
 	fileTree := parseCommandLineOutput(data)
+	fileTree.calcDirectorySizes()
 
 	sum := 0
 
 	for _, dir := range fileTree.directories {
-		size := fileTree.calcSize(dir)
-		if size <= TRESHOLD {
-			sum += size
+		if dir.size <= TRESHOLD {
+			sum += dir.size
 		}
 	}
 
