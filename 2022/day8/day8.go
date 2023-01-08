@@ -37,6 +37,15 @@ func (treeGroup *TreeGroup) getRow(row int) TreeGroup {
 	return result
 }
 
+func (treeGroup *TreeGroup) reverse() TreeGroup {
+	result := TreeGroup{}
+	for i := len(*treeGroup) - 1; i >= 0; i-- {
+		tree := (*treeGroup)[i]
+		result = append(result, tree)
+	}
+	return result
+}
+
 func (treeGroup *TreeGroup) getSurroundingGroups(tree Tree) []TreeGroup {
 	col := treeGroup.getCol(tree.col)
 	top := col[0:tree.row]
@@ -47,40 +56,42 @@ func (treeGroup *TreeGroup) getSurroundingGroups(tree Tree) []TreeGroup {
 	right := row[tree.col+1:]
 
 	return []TreeGroup{
-		top,
+		top.reverse(),
 		bottom,
-		left,
+		left.reverse(),
 		right,
 	}
 }
 
-func (treeGroup *TreeGroup) isLowerThan(tree Tree) bool {
-	for _, coverTree := range *treeGroup {
-		if tree.height <= coverTree.height {
-			return false
+func (treeGroup *TreeGroup) getViewingDistance(tree Tree) int {
+	distance := 0
+	for _, viewTree := range *treeGroup {
+		distance++
+		if tree.height <= viewTree.height {
+			return distance
 		}
 	}
-	return true
+	return distance
 }
 
-func (treeGroup *TreeGroup) isTreeVisible(tree Tree) bool {
+func (treeGroup *TreeGroup) getScenicScore(tree Tree) int {
+	score := 1
 	surroundingGroups := treeGroup.getSurroundingGroups(tree)
 	for _, group := range surroundingGroups {
-		if group.isLowerThan(tree) {
-			return true
-		}
+		score = score * group.getViewingDistance(tree)
 	}
-	return false
+	return score
 }
 
-func (treeGroup *TreeGroup) countVisibleTrees() int {
-	count := 0
+func (treeGroup *TreeGroup) getBestScenicScore() int {
+	bestScore := 0
 	for _, tree := range *treeGroup {
-		if treeGroup.isTreeVisible(tree) {
-			count++
+		treeScore := treeGroup.getScenicScore(tree)
+		if bestScore < treeScore {
+			bestScore = treeScore
 		}
 	}
-	return count
+	return bestScore
 }
 
 func parseData(data string) TreeGroup {
@@ -105,7 +116,7 @@ func parseData(data string) TreeGroup {
 func main() {
 	data := utils.LoadData()
 	treeGrid := parseData(data)
-	visibleTreeCount := treeGrid.countVisibleTrees()
+	visibleTreeCount := treeGrid.getBestScenicScore()
 
 	println(visibleTreeCount)
 }
